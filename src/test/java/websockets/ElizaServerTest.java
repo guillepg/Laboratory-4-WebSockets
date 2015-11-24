@@ -1,6 +1,8 @@
 package websockets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -62,9 +64,8 @@ public class ElizaServerTest {
 	}
 
 	@Test(timeout = 1000)
-	@Ignore
 	public void onChat() throws DeploymentException, IOException, URISyntaxException, InterruptedException {
-		// COMPLETE
+		CountDownLatch latch = new CountDownLatch(5);// COMPLETED
 		List<String> list = new ArrayList<>();
 		ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().build();
 		ClientManager client = ClientManager.createClient();
@@ -73,22 +74,28 @@ public class ElizaServerTest {
 			@Override
 			public void onOpen(Session session, EndpointConfig config) {
 
-				// COMPLETE
+				session.getAsyncRemote().sendText("My back hurts.");// COMPLETED
 
 				session.addMessageHandler(new MessageHandler.Whole<String>() {
 
 					@Override
 					public void onMessage(String message) {
 						list.add(message);
-						// COMPLETE
+						latch.countDown();// COMPLETED
 					}
 				});
 			}
 
 		}, configuration, new URI("ws://localhost:8025/websockets/eliza"));
-		// COMPLETE
-		// COMPLETE
-		// COMPLETE
+		latch.await();											// COMPLETED
+		assertEquals(5, list.size());							// COMPLETED
+		assertTrue("I see.".equals(list.get(3)) || "Why not?".equals(list.get(3)) ||
+				"Are you sure?".equals(list.get(3)) || "That is quite interesting.".equals(list.get(3)) ||
+				"Can you elaborate?".equals(list.get(3)) || "What does that suggest to you?".equals(list.get(3)));
+		// COMPLETED
+		// Opciones:
+		// "Are you sure?", "What does that suggest to you?", "I see.",
+		// "Can you elaborate?", "That is quite interesting.", "Why not?"
 	}
 
 	@After
